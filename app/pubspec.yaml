@@ -11,8 +11,8 @@ dependencies:
     sdk: flutter
   geolocator: ^3.0.0
   barcode_scan: ^1.0.0
-  firebase_messaging: ^4.0.0+1
-  flutter_local_notifications: ^0.5.2
+  # firebase_messaging: ^4.0.0+1
+  # flutter_local_notifications: ^0.5.2
   permission_handler: ^3.0.0
   agora_rtc_engine: ^0.9.3
   flutter_webview_plugin: ^0.3.1
