@@ -6,9 +6,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:geolocator/geolocator.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:barcode_scan/barcode_scan.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'configs.dart' as cfg;
@@ -33,9 +33,9 @@ class WebAppHome extends StatelessWidget {
   final Set<BuildContext> ctxs = Set();
 
   final FlutterWebviewPlugin _webviewPlugin = new FlutterWebviewPlugin();
-  // final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  // final FlutterLocalNotificationsPlugin _localNotifications =
-  //     new FlutterLocalNotificationsPlugin();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      new FlutterLocalNotificationsPlugin();
 
   // Data for progress indicator.
   final StreamController<double> _progress = StreamController<double>();
@@ -79,15 +79,15 @@ class WebAppHome extends StatelessWidget {
     }
 
     // Setup local notifications
-    // var initializationSettings = new InitializationSettings(
-    //     new AndroidInitializationSettings('ic_notification'),
-    //     new IOSInitializationSettings());
-    // _localNotifications.initialize(initializationSettings,
-    //     onSelectNotification: (url) {
-    //   if (url != null) {
-    //     _webviewPlugin.launch(url);
-    //   }
-    // });
+    var initializationSettings = new InitializationSettings(
+        new AndroidInitializationSettings('ic_notification'),
+        new IOSInitializationSettings());
+    _localNotifications.initialize(initializationSettings,
+        onSelectNotification: (url) {
+      if (url != null) {
+        _webviewPlugin.launch(url);
+      }
+    });
 
     // Trigger native geolocation permission request if needed
     if (cfg.configs['geolocation']) {
@@ -162,32 +162,32 @@ class WebAppHome extends StatelessWidget {
 
   void _enableRemoteNotifications(config) {
     // Request notifications permission on iOS
-    // _firebaseMessaging.requestNotificationPermissions();
+    _firebaseMessaging.requestNotificationPermissions();
 
     // Listen for messages
-    // _firebaseMessaging.configure(
-    //   onMessage: (Map<String, dynamic> msg) {
-    //     print('Got FCM message in foreground ${(msg)}');
-    //     _handleRemoteMessage(msg, true);
-    //   },
-    //   onLaunch: (Map<String, dynamic> msg) {
-    //     print('Pending FCM message on launch ${(msg)}');
-    //     _handleRemoteMessage(msg, false);
-    //   },
-    //   onResume: (Map<String, dynamic> msg) {
-    //     print('Pending FCM message on resume ${(msg)}');
-    //     _handleRemoteMessage(msg, false);
-    //   },
-    // );
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> msg) {
+        print('Got FCM message in foreground ${(msg)}');
+        _handleRemoteMessage(msg, true);
+      },
+      onLaunch: (Map<String, dynamic> msg) {
+        print('Pending FCM message on launch ${(msg)}');
+        _handleRemoteMessage(msg, false);
+      },
+      onResume: (Map<String, dynamic> msg) {
+        print('Pending FCM message on resume ${(msg)}');
+        _handleRemoteMessage(msg, false);
+      },
+    );
 
     // Optionally subscribe to a FCM topic
     final fcmTopic = config['fcm_topic'];
     if (fcmTopic != null) {
-      // _firebaseMessaging.subscribeToTopic(fcmTopic);
+      _firebaseMessaging.subscribeToTopic(fcmTopic);
     }
 
     // Listen for token updates
-    // _firebaseMessaging.onTokenRefresh.listen(_handleFcmToken);
+    _firebaseMessaging.onTokenRefresh.listen(_handleFcmToken);
   }
 
   void _handleFcmToken(token) {
@@ -207,14 +207,14 @@ class WebAppHome extends StatelessWidget {
     }
     final url = msg['data']['url'];
     if (showNotification) {
-      // var androidDetails = new AndroidNotificationDetails(
-      //     'main', cfg.configs['title'], '',
-      //     importance: Importance.Max, priority: Priority.High);
-      // var platformChannelSpecifics =
-      //     new NotificationDetails(androidDetails, new IOSNotificationDetails());
-      // _localNotifications.show(0, msg['notification']['title'],
-      //     msg['notification']['body'], platformChannelSpecifics,
-      //     payload: url);
+      var androidDetails = new AndroidNotificationDetails(
+          'main', cfg.configs['title'], '',
+          importance: Importance.Max, priority: Priority.High);
+      var platformChannelSpecifics =
+          new NotificationDetails(androidDetails, new IOSNotificationDetails());
+      _localNotifications.show(0, msg['notification']['title'],
+          msg['notification']['body'], platformChannelSpecifics,
+          payload: url);
     } else {
       _webviewPlugin.launch(url);
     }
@@ -256,9 +256,9 @@ class WebAppHome extends StatelessWidget {
           _unscheduleLocalNotification(args['id']);
           break;
         case 'fcmToken':
-          // _firebaseMessaging.getToken().then((token) {
-          //   _invokeJavascriptCallback('onFcmToken', token);
-          // });
+          _firebaseMessaging.getToken().then((token) {
+            _invokeJavascriptCallback('onFcmToken', token);
+          });
           break;
         case 'scanBarcode':
           _scanBarcode();
@@ -268,17 +268,17 @@ class WebAppHome extends StatelessWidget {
   }
 
   void _scheduleLocalNotification(id, title, body, date) {
-    // final androidDetails = new AndroidNotificationDetails(
-    //     'main', cfg.configs['title'], '',
-    //     importance: Importance.Max, priority: Priority.High);
-    // NotificationDetails platformChannelSpecifics =
-    //     new NotificationDetails(androidDetails, IOSNotificationDetails());
-    // _localNotifications.schedule(
-    //     id, title, body, date, platformChannelSpecifics);
+    final androidDetails = new AndroidNotificationDetails(
+        'main', cfg.configs['title'], '',
+        importance: Importance.Max, priority: Priority.High);
+    NotificationDetails platformChannelSpecifics =
+        new NotificationDetails(androidDetails, IOSNotificationDetails());
+    _localNotifications.schedule(
+        id, title, body, date, platformChannelSpecifics);
   }
 
   void _unscheduleLocalNotification(id) {
-    // _localNotifications.cancel(id);
+    _localNotifications.cancel(id);
   }
 
   // Handler for video calls
