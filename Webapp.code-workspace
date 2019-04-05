@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "app"
+		},
+		{
+			"path": "config"
+		},
+		{
+			"path": "scripts"
+		},
+		{
+			"path": "content"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.classpath": true,
+			"**/.project": true,
+			"**/.settings": true,
+			"**/.factorypath": true
+		}
+	}
+}

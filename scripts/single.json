@@ -1,0 +1,9 @@
+{
+	"apiKey": "",
+	"registrationId": "",
+	"notification": {
+		"title": "Test title",
+		"body": "Notification body. Touch for more.",
+		"url": "https://wordpress.org/about/"
+	}
+}
