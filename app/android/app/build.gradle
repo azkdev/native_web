@@ -42,9 +42,9 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         // For including 'libflutter.so'
-        // ndk {
-        //     abiFilters 'armeabi-v7a'
-        // }
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
     }
 
     buildTypes {

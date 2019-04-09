@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSContactsUsageDescription</key>  
+	<string>This app requires contacts access to function properly.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -47,9 +49,9 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Necesario para acceder al contenido</string>
+	<string>Necessary for accessing location content</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Necesario para escanear códigos QR</string>
+	<string>Necessary for QR codes scanning</string>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
 </dict>

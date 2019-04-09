@@ -10,6 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info/device_info.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 import 'configs.dart' as cfg;
 import 'agora_video_call.dart';
@@ -31,6 +33,9 @@ class WebApp extends StatelessWidget {
 class WebAppHome extends StatelessWidget {
   static const String MESSAGE_PREFIX = 'flutterHost';
   final Set<BuildContext> ctxs = Set();
+
+  // Device info plugin
+  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
   final FlutterWebviewPlugin _webviewPlugin = new FlutterWebviewPlugin();
   // final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
@@ -130,6 +135,58 @@ class WebAppHome extends StatelessWidget {
     );
   }
 
+  // Handle device info
+  void _getDeviceInfo() async {
+    AndroidDeviceInfo andrInfo;
+    IosDeviceInfo iosInfo;
+    String info;
+    Map<String, dynamic> mapInfo;
+    if (Platform.isAndroid) {
+      andrInfo = await deviceInfo.androidInfo;
+      mapInfo = {
+        'androidId': andrInfo.androidId,
+        'id': andrInfo.id,
+        'model': andrInfo.model,
+        'version': andrInfo.version,
+      };
+      info = jsonEncode(mapInfo);
+      _invokeJavascriptCallback('onDeviceInfo', info);
+    }
+    if (Platform.isIOS) {
+      iosInfo = await deviceInfo.iosInfo;
+      mapInfo = {
+        'vendorId': iosInfo.identifierForVendor,
+        'model': iosInfo.model,
+        'name': iosInfo.name,
+        'systemName': iosInfo.systemName,
+        'systemVersion': iosInfo.systemVersion,
+        'utsName': iosInfo.utsname.machine,
+      };
+      info = jsonEncode(mapInfo);
+      _invokeJavascriptCallback('onDeviceInfo', info);
+    }
+  }
+
+  // Get contacts
+  void _getContacts() async {
+    List<Map<String, dynamic>> cts = [];
+    // Get all contacts without thumbnail(faster)
+    await PermissionHandler().requestPermissions([PermissionGroup.contacts]);
+    Iterable<Contact> contacts =
+        await ContactsService.getContacts(withThumbnails: false);
+    contacts.forEach((Contact ct) {
+      if (ct.phones.length > 0) {
+        Map<String, dynamic> contct = {
+          'name': ct.displayName,
+          'phones': ct.phones.map((Item i) => i.value).toList(),
+        };
+        cts.add(contct);
+      }
+    });
+
+    _invokeJavascriptCallback('onContactsData', jsonEncode(cts));
+  }
+
   void _showProgress(WebViewStateChanged state) async {
     if (state.type == WebViewState.startLoad) {
       await _webviewPlugin.hide();
@@ -221,7 +278,6 @@ class WebAppHome extends StatelessWidget {
   }
 
   // Expose native features to JavaScript code
-
   void _onJavascriptMessage(String message) {
     _webviewPlugin.evalJavascript('_messageArgs').then((jsonArgs) {
       _webviewPlugin.evalJavascript('_messageArgs = "{}";');
@@ -244,6 +300,12 @@ class WebAppHome extends StatelessWidget {
           break;
         case 'joinVoiceChannel':
           _joinVoiceCall(args['channel'], ctxs.first, _webviewPlugin, args);
+          break;
+        case 'getDeviceInfo':
+          _getDeviceInfo();
+          break;
+        case 'getContacts':
+          _getContacts();
           break;
         case 'trackLocation':
           _trackLocation();
