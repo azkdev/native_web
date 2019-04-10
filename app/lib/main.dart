@@ -189,6 +189,8 @@ class WebAppHome extends StatelessWidget {
 
   void _showProgress(WebViewStateChanged state) async {
     if (state.type == WebViewState.startLoad) {
+      // await _webviewPlugin
+      //     .evalJavascript('if (FlutterHost) FlutterHost.isNative = true;');
       await _webviewPlugin.hide();
       t?.cancel();
       r = Random();
@@ -198,16 +200,12 @@ class WebAppHome extends StatelessWidget {
         double nr = r.nextDouble() * 0.0004;
         _progressSink.add(progr += nr);
       });
-      print('PROGRESS STARTED!!!');
     }
     if (state.type == WebViewState.finishLoad) {
-      await _webviewPlugin
-          .evalJavascript('if (FlutterHost) FlutterHost.isNative = true;');
+      _invokeJavascriptCallback('onNative', true);
       await _webviewPlugin.show();
-      // t?.cancel();
-      // progr = 0.0;
-      // _progressSink.add(0.0);
-      // print('PROGRESS STOPPED!!!');
+      progr = 0.0;
+      _progressSink.add(0.0);
     }
   }
 
