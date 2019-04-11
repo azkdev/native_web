@@ -52,6 +52,10 @@
 	<string>Necessary for accessing location content</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Necessary for QR codes scanning</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This app need to access your calendar events</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Play using while you are hiking</string>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
 </dict>
